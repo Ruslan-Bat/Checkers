@@ -17,9 +17,12 @@ public:
     // Отрисовать доску в окне
     void draw(Graph_lib::Window& win);
 
+    bool hasPiece(int cellX, int cellY) const;
+    
 private:
     int cell_size;  // Размер одной клетки (в пикселях)
     std::vector<std::vector<std::unique_ptr<Piece>>> grid;  // Матрица фигур
 
     void draw_cells(Graph_lib::Window& win);  // Внутренний метод отрисовки клеток
+
 };

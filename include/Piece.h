@@ -14,7 +14,7 @@ public:
     // Отрисовать шашку в окне
     void draw(Graph_lib::Window& win);
 
-    // Геттер цвета
+    // Узнать цвет
     PieceColor getColor() const { return color; }
 
 private:

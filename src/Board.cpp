@@ -18,7 +18,7 @@ Board::Board(int cell_size)
     for (int y = 0; y < 3; ++y) {
         for (int x = 0; x < SIZE; ++x) {
             if ((x + y) % 2 != 0) { // тёмные клетки
-                grid[y][x] = std::make_unique<Piece>(PieceColor::BLACK,
+                grid[y][x] = std::make_unique<Piece>(PieceColor::WHITE,
                                                      Point{x * cell_size, y * cell_size},
                                                      cell_size);
             }
@@ -29,7 +29,7 @@ Board::Board(int cell_size)
     for (int y = 5; y < SIZE; ++y) {
         for (int x = 0; x < SIZE; ++x) {
             if ((x + y) % 2 != 0) { // тёмные клетки
-                grid[y][x] = std::make_unique<Piece>(PieceColor::WHITE,
+                grid[y][x] = std::make_unique<Piece>(PieceColor::BLACK,
                                                      Point{x * cell_size, y * cell_size},
                                                      cell_size);
             }
@@ -48,18 +48,25 @@ void Board::draw(Window& win) {
             }
         }
     }
+    
 }
 
 void Board::draw_cells(Window& win) {
-    bool dark = false;
     for (int y = 0; y < SIZE; ++y) {
         for (int x = 0; x < SIZE; ++x) {
-            Color color = dark ? Color::dark_green : Color::white;
-            Rectangle* r = new Rectangle{Point{x * cell_size, y * cell_size}, cell_size, cell_size};
+            Color color = ((x + y) % 2 == 0) ? Color::white : Color::dark_green;
+            Rectangle *r = new Rectangle{Point{x * cell_size, y * cell_size}, cell_size, cell_size};
             r->set_fill_color(color);
             win.attach(*r);
-            dark = !dark;
         }
-        dark = !dark;
     }
+}
+
+bool Board::hasPiece(int cellX, int cellY) const {
+    // Проверяем, что координаты клетки в пределах доски
+    if (cellX < 0 || cellX >= SIZE || cellY < 0 || cellY >= SIZE)
+        return false;
+
+    // Возвращаем true, если в клетке есть указатель на Piece
+    return grid[cellY][cellX] != nullptr;
 }

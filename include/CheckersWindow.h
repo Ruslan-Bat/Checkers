@@ -9,7 +9,8 @@ public:
     // Конструктор: создаёт окно заданного размера
     CheckersWindow(Graph_lib::Point xy, int w, int h, const std::string& title);
 
+    int handle(int event) override;
+
 private:
     Board board;  // Игровая доска
-
 };
