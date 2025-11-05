@@ -17,6 +17,9 @@ public:
     // Узнать цвет
     PieceColor getColor() const { return color; }
 
+    void setPosition(Graph_lib::Point new_pos);
+    void detachFrom(Graph_lib::Window& win); 
+
 private:
     PieceColor color;               // Цвет шашки
     Graph_lib::Point position; // Верхний левый угол шашки на экране

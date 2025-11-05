@@ -5,9 +5,12 @@
 
 using namespace Graph_lib;
 
+Graph_lib::Window* g_window = nullptr; 
+
 CheckersWindow::CheckersWindow(Point xy, int w, int h, const std::string& title)
-    : Window{xy, w, h, title}, board(Board::CELL_SIZE) // размер клетки из константы
+    : Window{xy, w, h, title}, board(Board::CELL_SIZE), game(board)
 {
+    g_window = this;
     // Рисуем доску и все шашки
     board.draw(*this);
 }
@@ -27,11 +30,9 @@ int CheckersWindow::handle(int event)
         int cellX = x / Board::CELL_SIZE;
         int cellY = y / Board::CELL_SIZE;
 
-        if (board.hasPiece(cellX, cellY)) {
-            std::cout << "In kletka (" << cellX << ", " << cellY << ") has Piese\n";
-        } else {
-            std::cout << "kletka (" << cellX << ", " << cellY << ") pusta\n";
-}
+        game.handleClick(cellX, cellY);
+        redraw();
+
 
         return 1; // сигнал FLTK, что событие обработано
     }
