@@ -67,6 +67,7 @@ void Game::handleClick(int cellX, int cellY)
 
     // Если после хода человека наступил ход компьютера, вызываем его
     if (!whiteTurn) {
+        promoteIfNecessary(cellX, cellY); // Проверяем на превращение в дамку
         handleAITurn();
     }
 }
@@ -101,11 +102,44 @@ void Game::handleAITurn() {
         }
     }
     
+    promoteIfNecessary(toX, toY); // Проверяем на превращение в дамку
     whiteTurn = true; // Передаем ход человеку
+}
+
+void Game::promoteIfNecessary(int x, int y) {
+    int piece = board.getCell(x, y);
+
+    // Белая шашка достигла верхнего края
+    if (Piece::isWhite(piece) && Piece::isMan(piece) && y == 0) {
+        board.setPiece(x, y, Piece::WHITE_KING);
+        std::cout << "White piece promoted to King at (" << x << ", " << y << ")\n";
+    }
+    // Черная шашка достигла нижнего края
+    else if (Piece::isBlack(piece) && Piece::isMan(piece) && y == Board::SIZE - 1) {
+        board.setPiece(x, y, Piece::BLACK_KING);
+        std::cout << "Black piece promoted to King at (" << x << ", " << y << ")\n";
+    }
 }
 
 bool Game::isValidMove(int fromX, int fromY, int toX, int toY) const
 {
+    int piece = board.cellAt(fromX, fromY);
+    if (!Piece::isPiece(piece)) {
+        return false;
+    }
+
+    // Проверяем направление для обычной шашки
+    if (Piece::isMan(piece)) {
+        int dy_direction = toY - fromY;
+        if (Piece::isWhite(piece) && dy_direction >= 0) {
+            return false; // Белые ходят только вверх (dy < 0)
+        }
+        if (Piece::isBlack(piece) && dy_direction <= 0) {
+            return false; // Черные ходят только вниз (dy > 0)
+        }
+    }
+    // Для дамок (isKing) это ограничение не применяется, они могут ходить в любую сторону.
+
     int dx = std::abs(toX - fromX);
     int dy = std::abs(toY - fromY);
 
@@ -114,14 +148,15 @@ bool Game::isValidMove(int fromX, int fromY, int toX, int toY) const
         return true;
     }
 
+    // Ход со взятием на две клетки по диагонали
     if (dx == 2 && dy == 2) {
         int midX = (fromX + toX) / 2;
         int midY = (fromY + toY) / 2;
 
-        int fromVal = board.cellAt(fromX, fromY);
         int midVal = board.cellAt(midX, midY);
 
-        if (Piece::isPiece(midVal) && Piece::getColor(midVal) != Piece::getColor(fromVal)) {
+        // Взятие возможно, только если на промежуточной клетке стоит фигура противника
+        if (Piece::isPiece(midVal) && Piece::getColor(midVal) != Piece::getColor(piece)) {
             return true;
         }
     }

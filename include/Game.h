@@ -21,4 +21,5 @@ private:
     bool whiteTurn = true;
 
     void handleAITurn(); // Метод для обработки хода компьютера
+    void promoteIfNecessary(int x, int y); // Метод для превращения в дамку
 };

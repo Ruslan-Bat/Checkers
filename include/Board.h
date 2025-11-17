@@ -26,6 +26,8 @@ public:
     void removePiece(int x, int y);
     
     int getCell(int x, int y) const;
+
+    void setPiece(int x, int y, int piece);
     
 private:
     int cell_size;  // Размер одной клетки в пикселях

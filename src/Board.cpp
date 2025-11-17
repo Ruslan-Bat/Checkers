@@ -59,3 +59,8 @@ int Board::getCell(int x, int y) const {
     if (x < 0 || x >= SIZE || y < 0 || y >= SIZE) return 0;
     return cells[y * SIZE + x];
 }
+
+void Board::setPiece(int x, int y, int piece) {
+    if (x < 0 || x >= SIZE || y < 0 || y >= SIZE) return;
+    cells[y * SIZE + x] = piece;
+}
