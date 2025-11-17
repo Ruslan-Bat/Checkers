@@ -1,6 +1,7 @@
 #pragma once
 #include "Board.h"
 #include "Piece.h"
+#include "Player.h" // Добавляем заголовок для доступа к AI
 
 class Game {
 public:
@@ -18,4 +19,6 @@ private:
 
     bool isValidMove(int fromX, int fromY, int toX, int toY) const;
     bool whiteTurn = true;
+
+    void handleAITurn(); // Метод для обработки хода компьютера
 };
