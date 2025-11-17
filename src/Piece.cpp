@@ -1,35 +1,38 @@
 #include "Piece.h"
-#include "Graph_lib/Window.h"
-#include <string>
 
-using namespace Graph_lib;
+namespace Piece {
 
-Piece::Piece(PieceColor color, Point position, int cell_size)
-    : color(color), position(position), cell_size(cell_size),
-      image(position, color == PieceColor::WHITE ? "resources/pieces/white.png"
-                                                : "resources/pieces/black.png")
-{
-
+bool isPiece(int value) {
+    return value == BLACK_MAN || value == BLACK_KING ||
+           value == WHITE_MAN || value == WHITE_KING;
 }
 
-void Piece::draw(Window &win) {
-    win.attach(image);
+bool isBlack(int value) {
+    return value == BLACK_MAN || value == BLACK_KING;
 }
 
-void Piece::setPosition(Point new_pos)
-{
-    // Вычисляем смещение
-    int dx = new_pos.x - position.x;
-    int dy = new_pos.y - position.y;
-
-    // Сдвигаем изображение
-    image.move(dx, dy);
-
-    // Обновляем позицию
-    position = new_pos;
+bool isWhite(int value) {
+    return value == WHITE_MAN || value == WHITE_KING;
 }
 
-void Piece::detachFrom(Window& win)
-{
-    win.detach(image);
+bool isMan(int value) {
+    return value == BLACK_MAN || value == WHITE_MAN;
 }
+
+bool isKing(int value) {
+    return value == BLACK_KING || value == WHITE_KING;
+}
+
+PieceColor getColor(int value) {
+    if (isBlack(value)) return PieceColor::BLACK;
+    if (isWhite(value)) return PieceColor::WHITE;
+    return PieceColor::NONE;
+}
+
+PieceType getType(int value) {
+    if (isMan(value)) return PieceType::MAN;
+    if (isKing(value)) return PieceType::KING;
+    return PieceType::NONE;
+}
+
+} // namespace Piece

@@ -1,5 +1,6 @@
 #pragma once
 #include "Board.h"
+#include "Piece.h"
 
 class Game {
 public:
@@ -8,10 +9,13 @@ public:
     // Обработка клика по клетке
     void handleClick(int cellX, int cellY);
 
+    Board& getBoard() const { return board; }
+
 private:
-    Board& board;          // ссылка на доску (используем существующий объект)
-    bool pieceSelected;    // выбрана ли шашка
+    Board& board;
+    bool pieceSelected=false;    // выбрана ли шашка
     int selectedX, selectedY;
 
     bool isValidMove(int fromX, int fromY, int toX, int toY) const;
+    bool whiteTurn = true;
 };
