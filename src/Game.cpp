@@ -31,17 +31,32 @@ void Game::handleClick(int cellX, int cellY)
     if (pieceSelected && !board.hasPiece(cellX, cellY)) {
         if (isValidMove(selectedX, selectedY, cellX, cellY)) {
             
-            int dx = cellX - selectedX;
-            int dy = cellY - selectedY;
+            int piece = board.cellAt(selectedX, selectedY);
+            int dx_abs = std::abs(cellX - selectedX);
 
-            // Если ход — удар (на 2 клетки по диагонали)
-            if (std::abs(dx) == 2 && std::abs(dy) == 2) {
-                int midX = (selectedX + cellX) / 2;
-                int midY = (selectedY + cellY) / 2;
-
-                // Удаляем вражескую фишку
-                board.removePiece(midX, midY);
-                std::cout << "A chip was eaten on (" << midX << ", " << midY << ")\n";
+            // Если ход — удар (на 2+ клетки по диагонали для дамки, или на 2 для шашки)
+            if (dx_abs >= 2) {
+                // Для шашки взятие простое
+                if (Piece::isMan(piece)) {
+                    int midX = (selectedX + cellX) / 2;
+                    int midY = (selectedY + cellY) / 2;
+                    board.removePiece(midX, midY);
+                    std::cout << "A chip was eaten on (" << midX << ", " << midY << ")\n";
+                }
+                // Для дамки ищем, кого съели
+                else if (Piece::isKing(piece)) {
+                    int stepX = (cellX > selectedX) ? 1 : -1;
+                    int stepY = (cellY > selectedY) ? 1 : -1;
+                    for (int i = 1; i < dx_abs; ++i) {
+                        int currX = selectedX + i * stepX;
+                        int currY = selectedY + i * stepY;
+                        if (Piece::isPiece(board.cellAt(currX, currY))) {
+                            board.removePiece(currX, currY);
+                            std::cout << "King ate a piece on (" << currX << ", " << currY << ")\n";
+                            break; // Предполагаем только одно взятие за ход
+                        }
+                    }
+                }
             }
 
             // Перемещаем фишку
@@ -84,23 +99,26 @@ void Game::handleAITurn() {
 
     int fromX = move[0];
     int fromY = move[1];
-    int toX = move[2];
-    int toY = move[3];
+    int toX, toY;
+
+    // Если был съеден враг
+    if (move.size() > 4) {
+        int capturedX = move[2];
+        int capturedY = move[3];
+        toX = move[4];
+        toY = move[5];
+        
+        board.removePiece(capturedX, capturedY);
+        std::cout << "Computer ate a piece on (" << capturedX << ", " << capturedY << ")\n";
+    } else { // Обычный ход
+        toX = move[2];
+        toY = move[3];
+    }
 
     // Перемещаем фигуру
     board.movePiece(fromX, fromY, toX, toY);
     std::cout << "Computer move: (" << fromX << ", " << fromY << ") -> (" 
               << toX << ", " << toY << ")\n";
-
-    // Если были съедены фигуры, удаляем их
-    if (move.size() > 4) {
-        for (size_t i = 4; i < move.size(); i += 2) {
-            int capturedX = move[i];
-            int capturedY = move[i+1];
-            board.removePiece(capturedX, capturedY);
-            std::cout << "Computer ate a piece on (" << capturedX << ", " << capturedY << ")\n";
-        }
-    }
     
     promoteIfNecessary(toX, toY); // Проверяем на превращение в дамку
     whiteTurn = true; // Передаем ход человеку
@@ -124,41 +142,73 @@ void Game::promoteIfNecessary(int x, int y) {
 bool Game::isValidMove(int fromX, int fromY, int toX, int toY) const
 {
     int piece = board.cellAt(fromX, fromY);
-    if (!Piece::isPiece(piece)) {
-        return false;
-    }
+    if (!Piece::isPiece(piece)) return false; // на стартовой клетке нет фигуры
+    if (board.hasPiece(toX, toY)) return false; // конечная клетка занята
 
-    // Проверяем направление для обычной шашки
+    int dx_abs = std::abs(toX - fromX);
+    int dy_abs = std::abs(toY - fromY);
+
+    if (dx_abs != dy_abs) return false; // Ход не по диагонали
+
+    // --- Логика для обычных шашек ---
     if (Piece::isMan(piece)) {
         int dy_direction = toY - fromY;
-        if (Piece::isWhite(piece) && dy_direction >= 0) {
-            return false; // Белые ходят только вверх (dy < 0)
+        
+        // Ход со взятием (разрешен в любом направлении)
+        if (dx_abs == 2) {
+            int midX = (fromX + toX) / 2;
+            int midY = (fromY + toY) / 2;
+            int midPiece = board.cellAt(midX, midY);
+            if (Piece::isPiece(midPiece) && Piece::getColor(midPiece) != Piece::getColor(piece)) {
+                return true;
+            }
         }
-        if (Piece::isBlack(piece) && dy_direction <= 0) {
-            return false; // Черные ходят только вниз (dy > 0)
-        }
-    }
-    // Для дамок (isKing) это ограничение не применяется, они могут ходить в любую сторону.
 
-    int dx = std::abs(toX - fromX);
-    int dy = std::abs(toY - fromY);
-
-    // Обычный ход на одну клетку по диагонали
-    if (dx == 1 && dy == 1) {
-        return true;
-    }
-
-    // Ход со взятием на две клетки по диагонали
-    if (dx == 2 && dy == 2) {
-        int midX = (fromX + toX) / 2;
-        int midY = (fromY + toY) / 2;
-
-        int midVal = board.cellAt(midX, midY);
-
-        // Взятие возможно, только если на промежуточной клетке стоит фигура противника
-        if (Piece::isPiece(midVal) && Piece::getColor(midVal) != Piece::getColor(piece)) {
+        // Обычный ход (только вперед)
+        if (dx_abs == 1) {
+            if (Piece::isWhite(piece) && dy_direction >= 0) return false; // Белые ходят только вверх
+            if (Piece::isBlack(piece) && dy_direction <= 0) return false; // Черные ходят только вниз
             return true;
         }
+        
+        return false; // Для шашек другие ходы невозможны
     }
+
+    // --- Логика для дамок ---
+    if (Piece::isKing(piece)) {
+        int stepX = (toX > fromX) ? 1 : -1;
+        int stepY = (toY > fromY) ? 1 : -1;
+
+        int capturedPiecesCount = 0;
+        int pathLength = dx_abs;
+
+        // Проверяем все клетки на пути
+        for (int i = 1; i < pathLength; ++i) {
+            int currX = fromX + i * stepX;
+            int currY = fromY + i * stepY;
+            if (Piece::isPiece(board.cellAt(currX, currY))) {
+                capturedPiecesCount++;
+            }
+        }
+
+        // Если на пути нет фигур - это обычный ход
+        if (capturedPiecesCount == 0) {
+            return true;
+        }
+        // Если на пути одна фигура - это может быть взятие
+        if (capturedPiecesCount == 1) {
+            // Проверяем, что эта фигура - вражеская
+            for (int i = 1; i < pathLength; ++i) {
+                int currX = fromX + i * stepX;
+                int currY = fromY + i * stepY;
+                int pathPiece = board.cellAt(currX, currY);
+                if (Piece::isPiece(pathPiece) && Piece::getColor(pathPiece) != Piece::getColor(piece)) {
+                    return true; // Найдена вражеская фигура для взятия
+                }
+            }
+        }
+        // Если на пути больше одной фигуры или одна своя - ход невозможен
+    }
+
     return false;
 }
