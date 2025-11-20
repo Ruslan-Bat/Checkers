@@ -60,3 +60,17 @@ add_custom_target(CopyResources ALL
 )
 
 add_dependencies(${TARGET} CopyResources)
+
+
+
+# Копирование файлов модели ИИ
+add_custom_target(CopyAIFiles ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/w1.txt ${CMAKE_BINARY_DIR}/w1.txt
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/b1.txt ${CMAKE_BINARY_DIR}/b1.txt
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/w2.txt ${CMAKE_BINARY_DIR}/w2.txt
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/b2.txt ${CMAKE_BINARY_DIR}/b2.txt
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/w3.txt ${CMAKE_BINARY_DIR}/w3.txt
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/b3.txt ${CMAKE_BINARY_DIR}/b3.txt
+    COMMENT "Copying AI model files into runtime output directory"
+)
+add_dependencies(${TARGET} CopyAIFiles)

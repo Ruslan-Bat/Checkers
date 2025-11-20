@@ -99,26 +99,23 @@ void Game::handleAITurn() {
 
     int fromX = move[0];
     int fromY = move[1];
-    int toX, toY;
-
-    // Если был съеден враг
-    if (move.size() > 4) {
-        int capturedX = move[2];
-        int capturedY = move[3];
-        toX = move[4];
-        toY = move[5];
-        
-        board.removePiece(capturedX, capturedY);
-        std::cout << "Computer ate a piece on (" << capturedX << ", " << capturedY << ")\n";
-    } else { // Обычный ход
-        toX = move[2];
-        toY = move[3];
-    }
+    int toX = move.at(move.size() - 2);
+    int toY = move.at(move.size() - 1);
 
     // Перемещаем фигуру
     board.movePiece(fromX, fromY, toX, toY);
     std::cout << "Computer move: (" << fromX << ", " << fromY << ") -> (" 
               << toX << ", " << toY << ")\n";
+
+    // Если были съедены фигуры, удаляем их
+    if (move.size() > 2) {
+        for (size_t i = 2; i < move.size() - 2; i += 2) {
+            int capturedX = move[i];
+            int capturedY = move[i+1];
+            board.removePiece(capturedX, capturedY);
+            std::cout << "Computer ate a piece on (" << capturedX << ", " << capturedY << ")\n";
+        }
+    }
     
     promoteIfNecessary(toX, toY); // Проверяем на превращение в дамку
     whiteTurn = true; // Передаем ход человеку
@@ -153,8 +150,14 @@ bool Game::isValidMove(int fromX, int fromY, int toX, int toY) const
     // --- Логика для обычных шашек ---
     if (Piece::isMan(piece)) {
         int dy_direction = toY - fromY;
-        
-        // Ход со взятием (разрешен в любом направлении)
+        if (Piece::isWhite(piece) && dy_direction >= 0) return false; // Белые ходят только вверх
+        if (Piece::isBlack(piece) && dy_direction <= 0) return false; // Черные ходят только вниз
+
+        // Обычный ход
+        if (dx_abs == 1) {
+            return true;
+        }
+        // Ход со взятием
         if (dx_abs == 2) {
             int midX = (fromX + toX) / 2;
             int midY = (fromY + toY) / 2;
@@ -163,14 +166,6 @@ bool Game::isValidMove(int fromX, int fromY, int toX, int toY) const
                 return true;
             }
         }
-
-        // Обычный ход (только вперед)
-        if (dx_abs == 1) {
-            if (Piece::isWhite(piece) && dy_direction >= 0) return false; // Белые ходят только вверх
-            if (Piece::isBlack(piece) && dy_direction <= 0) return false; // Черные ходят только вниз
-            return true;
-        }
-        
         return false; // Для шашек другие ходы невозможны
     }
 

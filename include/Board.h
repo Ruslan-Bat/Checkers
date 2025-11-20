@@ -32,4 +32,7 @@ public:
 private:
     int cell_size;  // Размер одной клетки в пикселях
     std::vector<int> cells;  // Матрица фигур
+
+public: // Expose for AI
+    const std::vector<int>& getCells() const { return cells; }
 };
