@@ -9,7 +9,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_compile_options(-Wall -Wextra)
 
 # Расположение FLTK (изменить при необходимости)
-set(FLTK_ROOT "C:\\FLTK\\bin")
+set(FLTK_ROOT "C:\\proga\\FLTK2\\bin")
 find_package(FLTK REQUIRED)
 
 set(TARGET "Checkers")
