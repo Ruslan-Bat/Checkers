@@ -14,5 +14,6 @@
 #include <FL/Fl_GIF_Image.H>
 #include <FL/Fl_JPEG_Image.H>
 #include <FL/Fl_PNG_Image.H>
+#include <FL/Fl_Double_Window.H>
 
 #endif  // #ifndef FLTK_GUARD

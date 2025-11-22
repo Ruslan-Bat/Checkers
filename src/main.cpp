@@ -12,7 +12,9 @@ using namespace Graph_lib;
 int main()
   try
   {
-    CheckersWindow win(Point{100, 100}, 640, 640, "Checkers");
+    Board board;
+    Game game(board);
+    CheckersWindow win(Point{100, 100}, 640, 640, "Checkers", game);
     return gui_main();
   }
 
@@ -26,4 +28,3 @@ catch (...)
   std::cerr << "Oops, something went wrong..." << std::endl;
   return 2;
 }
-

@@ -2,6 +2,7 @@
 #include "Piece.h"
 #include "Graph_lib/Graph.h"
 #include <memory>
+#include <iostream>
 
 using namespace Graph_lib;
 
@@ -9,57 +10,57 @@ Board::Board(int cell_size)
     : cell_size(cell_size)
 {
     // Инициализация сетки 8x8
-    grid.resize(SIZE);
+    cells.resize(SIZE * SIZE, 0);
     for (int y = 0; y < SIZE; ++y) {
-        grid[y].resize(SIZE);
-    }
-
-    // Расстановка чёрных шашек (ряды 0-2)
-    for (int y = 0; y < 3; ++y) {
-        for (int x = 0; x < SIZE; ++x) {
-            if ((x + y) % 2 != 0) { // тёмные клетки
-                grid[y][x] = std::make_unique<Piece>(PieceColor::BLACK,
-                                                     Point{x * cell_size, y * cell_size},
-                                                     cell_size);
-            }
-        }
-    }
-
-    // Расстановка белых шашек (ряды 5-7)
-    for (int y = 5; y < SIZE; ++y) {
-        for (int x = 0; x < SIZE; ++x) {
-            if ((x + y) % 2 != 0) { // тёмные клетки
-                grid[y][x] = std::make_unique<Piece>(PieceColor::WHITE,
-                                                     Point{x * cell_size, y * cell_size},
-                                                     cell_size);
+        for (int x = 0; x<SIZE; ++x){
+            if ((x+y) % 2 !=0) {
+                if (y < 3) {
+                    cells[y * SIZE + x] = Piece::BLACK_MAN;
+                } else if (y > 4) {
+                    cells[y *SIZE + x] = Piece::WHITE_MAN;
+                } else {
+                    cells[y *SIZE + x] = Piece::PLAYABLE_EMPTY;
+                }
+            } else {
+                cells[y * SIZE + x] = Piece::EMPTY;
             }
         }
     }
 }
 
-void Board::draw(Window& win) {
-    draw_cells(win);
-
-    // Рисуем все фигуры
-    for (int y = 0; y < SIZE; ++y) {
-        for (int x = 0; x < SIZE; ++x) {
-            if (grid[y][x]) {
-                grid[y][x]->draw(win);
-            }
-        }
-    }
+bool Board::hasPiece(int x, int y) const {
+    if (x < 0 || x >= SIZE || y < 0 || y >= SIZE) return false;
+    int val = cells[y * SIZE + x];
+    return Piece::isPiece(val);
 }
 
-void Board::draw_cells(Window& win) {
-    bool dark = false;
-    for (int y = 0; y < SIZE; ++y) {
-        for (int x = 0; x < SIZE; ++x) {
-            Color color = dark ? Color::dark_green : Color::white;
-            Rectangle* r = new Rectangle{Point{x * cell_size, y * cell_size}, cell_size, cell_size};
-            r->set_fill_color(color);
-            win.attach(*r);
-            dark = !dark;
-        }
-        dark = !dark;
-    }
+
+bool Board::movePiece(int fromX, int fromY, int toX, int toY) {
+    if (!hasPiece(fromX, fromY)) return false;   // нет фишки
+    if (hasPiece(toX, toY)) return false;        // место занято
+
+    std::swap(cells[fromY * SIZE + fromX], cells[toY * SIZE + toX]);
+    return true;
+}
+
+int Board::cellAt(int x, int y) const {
+    if (x < 0 || x >= SIZE || y < 0 || y >= SIZE) return 0;
+    return cells[y * SIZE + x];
+}
+
+void Board::removePiece(int x, int y) {
+    if (x < 0 || x >= SIZE || y < 0 || y >= SIZE) return;
+    int val = cells[y * SIZE + x];
+    if (Piece::isPiece(val))
+        cells[y * SIZE + x] = Piece::PLAYABLE_EMPTY;
+}
+
+int Board::getCell(int x, int y) const {
+    if (x < 0 || x >= SIZE || y < 0 || y >= SIZE) return 0;
+    return cells[y * SIZE + x];
+}
+
+void Board::setPiece(int x, int y, int piece) {
+    if (x < 0 || x >= SIZE || y < 0 || y >= SIZE) return;
+    cells[y * SIZE + x] = piece;
 }
