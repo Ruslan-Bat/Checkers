@@ -150,8 +150,7 @@ bool Game::isValidMove(int fromX, int fromY, int toX, int toY) const
     // --- Логика для обычных шашек ---
     if (Piece::isMan(piece)) {
         int dy_direction = toY - fromY;
-        if (Piece::isWhite(piece) && dy_direction >= 0) return false; // Белые ходят только вверх
-        if (Piece::isBlack(piece) && dy_direction <= 0) return false; // Черные ходят только вниз
+        if (Piece::isWhite(piece) && dy_direction == 1) return false; // Белые ходят только вверх
 
         // Обычный ход
         if (dx_abs == 1) {

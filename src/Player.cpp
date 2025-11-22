@@ -4,7 +4,7 @@
 using namespace std;
 
 // ----------------------------
-// Параметры (как в Python)
+// Гиперпараметры (как в Python)
 // ----------------------------
 constexpr int STATE_CELLS = 64;
 constexpr int STATE_CHANNELS = 6;
@@ -106,7 +106,7 @@ inline void leaky_relu_inplace(vector<float>& v, float alpha = 0.01f) {
 }
 
 // ----------------------------
-// Q network forward
+// Q network 
 // ----------------------------
 float forward_Q(
     const vector<float>& state_action,
